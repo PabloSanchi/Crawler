@@ -8,14 +8,12 @@ const root = "https://en.wikipedia.org/wiki/";
 // get html code
 const getHtml = async (url) => {
 	try {
-		const response = await fetch(url);
-		// printToFile(response.url.replace(root, '')+'.html', await response.text());
-		if (response.status === 404) {
-			console.error(`Error: ${url}`);
-			return null;
-		}
-
-		return await response.text();
+		return fetch(url).then(response => {
+			if (response.status === 404) {
+				return null;
+			}
+			return response.text();
+		});
 	} catch (error) {
 		console.error(`Error: ${url}`);
 	}
@@ -23,9 +21,9 @@ const getHtml = async (url) => {
 
 // get links from and url
 const getLinks = async (url, visited) => {
-	const html = await getHtml(url);
-	const $ = cheerio.load(html);
-	const links = $("a")
+	return getHtml(url).then(html => {
+		const $ = cheerio.load(html);
+		const links = $("a")
 		.map((i, link) => $(link).attr("href"))
 		.filter(
 			(i, link) =>
@@ -33,8 +31,9 @@ const getLinks = async (url, visited) => {
 				visited[root + link.replace("/wiki/", "")] == undefined
 		)
 		.get();
-
-	return links;
+		
+		return links;
+	});
 };
 
 // print to file the html code, given the filename and the code

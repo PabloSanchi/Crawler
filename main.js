@@ -2,13 +2,13 @@ import { Worker, isMainThread, workerData } from 'worker_threads';
 import { getLinks, getHtml, printToFile, root } from './tools.js';
 
 const visited = {};
-const maxDepth = 1000;
+const maxDepth = 100;
 
 const main = async () => {   
     
     console.log('Crawling...');
     
-    let idx = 0, visit = [root];
+    let visit = [root];
     let name = 0;
     
     while(Object.keys(visited).length <= maxDepth) {
@@ -19,15 +19,13 @@ const main = async () => {
             const fullLink = root + link.replace('/wiki/', '')
             visited[link] = true;
             visit.push(fullLink);
+            
             name = link.replace('/wiki/', '');
-            // remove from symbols (%,/,:,=) from the name variable
-            name = name.replace(/[%/:=]/g, '');
+            name = name.replace(/[%/:=.,]/g, '');
             
             const html = await getHtml(fullLink)
             printToFile(name.toString(), html)
-            
         }
-
         visit.shift()
     }
 
